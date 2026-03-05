@@ -68,6 +68,11 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
+
+  app.get("/", (req, res) => {
+    res.send("BMD Backend is running successfully!");
+  });
+
 app.use("/api/auth", authRoutes);
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/availability", availabilityRoutes);
