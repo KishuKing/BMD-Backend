@@ -13,6 +13,8 @@ const doctorSchema = new mongoose.Schema({
     gender: { type: String }
   },
 
+  UniqueRegistrationNumber: {type: String, require: true},
+
   qualifications: [{ type: String }], 
 
   specializations: [{ type: String }], 

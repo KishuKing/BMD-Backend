@@ -8,6 +8,9 @@ const doctorRoutes = require("./routes/doctorRoutes");
 const availabilityRoutes = require("./routes/avalibilityRoutes");
 const appointmentRoutes = require("./routes/appointmentRoute");
 const ChatMessage = require("./models/ChatMessage");
+const productRoute = require("./routes/productRoutes");
+const orderRoute = require("./routes/orderRoutes");
+const cartRoute = require("./routes/cartRoutes");
 
 dotenv.config();
 
@@ -77,6 +80,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/availability", availabilityRoutes);
 app.use("/api/appointments", appointmentRoutes);
+app.use("/api/product", productRoute);
+app.use("/api/order", orderRoute);
+// app.use("/api/vendor", vendorRoutes);
+app.use("/api/cart", cartRoute);
 
 const PORT = process.env.PORT || 5000;
 

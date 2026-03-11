@@ -6,7 +6,8 @@ exports.buildDoctorProfile = async (req, res) => {
       const { 
           name, 
           age, 
-          gender, 
+          gender,
+          UniqueRegisterationNumber,
           qualifications, 
           specializations, // Ensure this matches the Flutter key
           experience, 
@@ -18,6 +19,7 @@ exports.buildDoctorProfile = async (req, res) => {
       const profileData = {
           user: req.user._id,
           personalInfo: { name, age, gender },
+          UniqueRegisterationNumber,
           qualifications,
           specializations, // This will now correctly save the array
           experienceYears: experience,
