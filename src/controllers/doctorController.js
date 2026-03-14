@@ -13,6 +13,8 @@ exports.buildDoctorProfile = async (req, res) => {
           experience, 
           fee, 
           affiliations, 
+          profileImage,
+         certificateImage,
           bio 
       } = req.body;
 
@@ -22,6 +24,8 @@ exports.buildDoctorProfile = async (req, res) => {
           UniqueRegisterationNumber,
           qualifications,
           specializations, // This will now correctly save the array
+          profileImage: profileImage, 
+          certificateImage: certificateImage,
           experienceYears: experience,
           consultationFee: fee,
           affiliations,

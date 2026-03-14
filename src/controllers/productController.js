@@ -19,14 +19,28 @@ exports.getProductById = async (req, res) => {
 };
 
 exports.addProduct = async (req, res) => {
-    try {
-      const product = new Product({ ...req.body, vendorId: req.params.vendorId });
+  try {
+      // req.body is populated by Multer middleware in your routes
+      const { name, brand, description, price, unitQuantity, category } = req.body;
+
+      const productData = {
+          name,
+          brand,
+          description,
+          price,
+          unitQuantity,
+          category: category || "TABLETS",
+          vendorId: req.params.vendorId,
+          productImage: req.file ? req.file.path : "" 
+      };
+
+      const product = new Product(productData);
       await product.save();
       res.status(201).json(product);
-    } catch (err) {
+  } catch (err) {
       res.status(400).json({ error: err.message });
-    }
-  };
+  }
+};
   
   // Update Product
   exports.updateProduct = async (req, res) => {

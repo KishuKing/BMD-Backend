@@ -1,6 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+
+dotenv.config();
+
 const http = require("http"); // Required for Socket.io
 const { Server } = require("socket.io"); // Required for Socket.io
 const authRoutes = require("./routes/authRoutes");
@@ -11,11 +14,12 @@ const ChatMessage = require("./models/ChatMessage");
 const productRoute = require("./routes/productRoutes");
 const orderRoute = require("./routes/orderRoutes");
 const cartRoute = require("./routes/cartRoutes");
+const imgRoute = require("./routes/doctorImageUploadRoute");
 
-dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const cors = require("cors");
 app.use(cors());
@@ -84,6 +88,7 @@ app.use("/api/product", productRoute);
 app.use("/api/order", orderRoute);
 // app.use("/api/vendor", vendorRoutes);
 app.use("/api/cart", cartRoute);
+app.use("/api/img", imgRoute);
 
 const PORT = process.env.PORT || 5000;
 

@@ -29,6 +29,16 @@ const doctorSchema = new mongoose.Schema({
 
   bio: { type: String },
 
+  profileImage: {
+    url: { type: String, default: 'default-avatar-url' },
+    publicId: { type: String }
+  },
+
+  certificateImage: {
+    url: { type: String, default: 'default-avatar-url' },
+    publicId: { type: String }
+  }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Doctor', doctorSchema);

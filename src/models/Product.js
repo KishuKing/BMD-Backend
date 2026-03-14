@@ -36,8 +36,9 @@ const productSchema = new mongoose.Schema({
         type: Boolean, 
         default: true 
     },
-    imageUrl: { 
-        type: String 
+    productImage: { 
+        type: String, 
+        default: 'default-avatar-url'
     }
   });
 
