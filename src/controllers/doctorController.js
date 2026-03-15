@@ -60,3 +60,67 @@ exports.getDoctors = async (req, res) => {
         });
     }
 };
+
+exports.getPendingDoctors = async (req, res) => {
+    try {
+      // Fetch doctors where verified property is false
+      const pendingDoctors = await Doctor.find({ verified: 'false' })
+        .select('-password') // Exclude sensitive data
+        .sort({ createdAt: -1 });
+  
+      res.status(200).json(pendingDoctors);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Server Error: Could not fetch pending doctors', 
+        error: error.message 
+      });
+    }
+  };
+
+  // controllers/doctorController.js
+exports.getDoctorById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log("Fetching Doctor with ID:", id); // Check your terminal for this!
+  
+      if (!id || id === 'undefined') {
+        return res.status(400).json({ message: "No Doctor ID provided" });
+      }
+  
+      const doctor = await Doctor.findById(id).populate('user', 'email');
+  
+      if (!doctor) {
+        console.log("Doctor not found in Database");
+        return res.status(404).json({ message: "Doctor not found" });
+      }
+  
+      res.status(200).json(doctor);
+    } catch (error) {
+      console.error("Error in getDoctorById:", error.message);
+      res.status(500).json({ message: "Server Error", error: error.message });
+    }
+  };
+
+  exports.approveDoctor = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      const doctor = await Doctor.findByIdAndUpdate(
+        id,
+        { verified: true },
+        { new: true } // Returns the updated document
+      );
+  
+      if (!doctor) {
+        return res.status(404).json({ message: "Doctor not found" });
+      }
+  
+      res.status(200).json({ 
+        message: "Doctor verified successfully", 
+        doctor 
+      });
+    } catch (error) {
+      console.error("Error approving doctor:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };

@@ -37,6 +37,11 @@ const doctorSchema = new mongoose.Schema({
   certificateImage: {
     url: { type: String, default: 'default-avatar-url' },
     publicId: { type: String }
+  },
+
+  verified: {
+    type: Boolean,
+    default: false
   }
 
 }, { timestamps: true });

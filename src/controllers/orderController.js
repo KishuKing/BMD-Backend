@@ -34,11 +34,15 @@ exports.getAllOrders = async (req, res) => {
 
 exports.getRecentOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
-        .sort({ createdAt: -1 })
-        .limit(5); // Returns the 5 most recent orders
+    const { vendorId } = req.params;
+
+    const orders = await Order.find({ vendorId: vendorId }) // filter
+      .sort({ createdAt: -1 })
+      .limit(5);
+
     res.status(200).json(orders);
-} catch (error) {
+
+  } catch (error) {
     res.status(500).json({ message: "Failed to fetch recent orders" });
-}
+  }
 };

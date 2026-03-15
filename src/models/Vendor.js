@@ -10,13 +10,18 @@ const vendorSchema = new mongoose.Schema({
       city: String,
       coordinates: { lat: Number, lng: Number }
     },
-    pharmacyCertificateUrl: { type: String }, // URL to uploaded document/image
     drugLicenseNumber: { type: String, required: true, unique: true }, // The "special register number"
     pharmacistDetails: {
       name: String,
       registrationNumber: String // Professional pharmacist ID
     },
-    isVerified: { type: Boolean, default: false }, // Admin must approve before they can sell
+    verified: {
+      type: Boolean,
+      default: false
+    },
+    certificateImage: {
+      type: String,
+    },
     joinedAt: { type: Date, default: Date.now }
   });
   
