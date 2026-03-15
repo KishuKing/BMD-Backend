@@ -17,6 +17,7 @@ const cartRoute = require("./routes/cartRoutes");
 const imgRoute = require("./routes/doctorImageUploadRoute");
 const vendorRoute = require('./routes/vendorRoute');
 const adminRoute = require('./routes/adminRoutes');
+const chatbotRoute = require('./routes/chatbotRoute');
 
 
 const app = express();
@@ -92,6 +93,7 @@ app.use("/api/vendor", vendorRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/img", imgRoute);
 app.use("/api/admin", adminRoute);
+app.use("/api/chatbot", chatbotRoute);
 
 const PORT = process.env.PORT || 5000;
 
