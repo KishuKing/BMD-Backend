@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    userId: { 
+    vendorId: { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User' 
+        ref: 'Vendor' 
     },
     orderNumber: { 
         type: String, 
