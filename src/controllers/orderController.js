@@ -34,30 +34,21 @@ exports.getAllOrders = async (req, res) => {
 
 exports.getRecentOrders = async (req, res) => {
   try {
-    // 1. Match the parameter name used in your route. 
-    // If your route is /recent/:id, use req.params.id
-    const vendorId = req.params.id || req.params.vendorId;
+    const vendorId = req.params.id; 
 
-    console.log("Fetching orders for Vendor ID:", vendorId);
+    if (!vendorId) {
+      return res.status(400).json({ message: "Vendor ID is required" });
+    }
 
-    // 2. Query the database. 
-    // IMPORTANT: Ensure your Order schema actually uses the field name 'vendorId'.
-    // If your schema uses 'vendor', change the key below to 'vendor: vendorId'
     const orders = await Order.find({ vendorId: vendorId })
-      .populate("userId", "name email") // Optional: brings in customer details if needed
-      .sort({ createdAt: -1 })
-      .limit(5);
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 });
 
-    console.log(`Found ${orders.length} orders`);
+    console.log(`Vendor ID: ${vendorId} | Orders Found: ${orders.length}`);
 
-    // 3. Always return an array, even if empty, so the frontend doesn't crash
     res.status(200).json(orders);
-
   } catch (error) {
-    console.error("Order Fetch Error:", error.message);
-    res.status(500).json({ 
-      message: "Failed to fetch recent orders",
-      error: error.message 
-    });
+    console.error("Fetch Error:", error);
+    res.status(500).json({ message: "Failed to fetch orders", error: error.message });
   }
 };
