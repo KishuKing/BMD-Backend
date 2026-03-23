@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    vendorId: { 
+    vendorIds: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Vendor' 
-    },
+    }],
     userId: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User' 
@@ -19,7 +19,7 @@ const orderSchema = new mongoose.Schema({
     },
     shippingAddress: {
         type: String,
-        require: true
+        required: true
     },
     status: { 
         type: String, 

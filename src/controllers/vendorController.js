@@ -1,39 +1,81 @@
 const Vendor  = require('../models/Vendor');
 const Order = require('../models/Order');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+// Generate JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+};
 
 // 1. Vendor Registration
 exports.registerVendor = async (req, res) => {
   try {
+    const { 
+      name, email, password, shopName, address, city, 
+      drugLicenseNumber, pharmacistName, pharmacistRegNo 
+    } = req.body;
 
-    const vendor = new Vendor({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      shopName: req.body.shopName,
+    // Check if vendor already exists
+    const existing = await Vendor.findOne({ email });
+    if (existing) return res.status(400).json({ message: "Email already exists" });
 
-      location: {
-        address: req.body.address,
-        city: req.body.city
-      },
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      drugLicenseNumber: req.body.drugLicenseNumber,
+    // Get Cloudinary URL from req.file (provided by your cloudinaryConfig storage)
+    const certificateUrl = req.file ? req.file.path : null;
 
+    if (!certificateUrl) {
+      return res.status(400).json({ message: "Certificate image is required" });
+    }
+
+    const newVendor = new Vendor({
+      name,
+      email,
+      password: hashedPassword,
+      shopName,
+      location: { address, city },
+      drugLicenseNumber,
       pharmacistDetails: {
-        name: req.body.pharmacistName,
-        registrationNumber: req.body.pharmacistRegNumber
+        name: pharmacistName,
+        registrationNumber: pharmacistRegNo
       },
-
-      certificateImage: req.body.certificateImage
+      certificateImage: certificateUrl
     });
 
-    await vendor.save();
+    await newVendor.save();
+    res.status(201).json({ success: true, message: "Vendor registered!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
 
-    res.status(201).json({
-      message: "Registration successful. Pending admin verification."
-    });
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    const user = await Vendor.findOne({ email });
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: "vendor",
+        token: generateToken(user._id),
+      });
+
+    } else {
+      res.status(401).json({ message: "Invalid email or password" });
+    }
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 

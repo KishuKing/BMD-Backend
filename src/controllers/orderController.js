@@ -1,21 +1,70 @@
 const Order = require('../models/Order');
+const Product = require('../models/Product'); // Make sure to require the Product model
+const mongoose = require('mongoose'); // Add this at the top
 
 exports.createOrder = async (req, res) => {
-  const newOrder = new Order(req.body);
   try {
+    const { items, userId, shippingAddress, totalAmount, orderNumber } = req.body;
+
+    // --- FIX IS HERE ---
+    // Instead of item._id, reach into item.medicineId._id
+    const productIds = items.map(item => {
+      return item.medicineId && item.medicineId._id 
+        ? item.medicineId._id 
+        : item._id; 
+    });
+    // -------------------
+
+    console.log("Searching for Product IDs:", productIds);
+
+    const productsFromDb = await Product.find({ _id: { $in: productIds } });
+    console.log("Found Products in DB:", productsFromDb);
+
+    const uniqueVendorIds = [...new Set(
+      productsFromDb
+        .map(p => p.vendorId ? p.vendorId.toString() : null)
+        .filter(v => v !== null)
+    )];
+
+    const newOrder = new Order({
+      userId,
+      orderNumber,
+      items, 
+      vendorIds: uniqueVendorIds, 
+      totalAmount,
+      shippingAddress,
+      status: "Pending"
+    });
+
     const savedOrder = await newOrder.save();
     res.status(201).json(savedOrder);
   } catch (err) {
+    console.error("Order Save Error:", err);
     res.status(400).json({ message: err.message });
   }
 };
 
 exports.getOrderHistory = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.params.userId }).sort({ createdAt: -1 });
-    res.json(orders);
+    const { userId } = req.params;
+
+    // 1. Validate the ID format to prevent server crashes
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid User ID format" });
+    }
+
+    // 2. Find orders and populate the medicine details inside the items array
+    const orders = await Order.find({ userId: userId })
+      .populate({
+        path: 'items.medicineId', // This reaches into the items array to get product details
+        select: 'name price productImage' 
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(orders);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Order History Error:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
   }
 };
 
@@ -31,22 +80,38 @@ exports.getAllOrders = async (req, res) => {
       res.status(500).json({ message: "Error fetching orders", error });
   }
 };
-
 exports.getRecentOrders = async (req, res) => {
   try {
-    const vendorId = req.params.id; 
+    const vendorId = req.params.vendorId;
 
     if (!vendorId) {
       return res.status(400).json({ message: "Vendor ID is required" });
     }
 
-    const orders = await Order.find({ vendorId: vendorId })
-      .populate("userId", "name email")
-      .sort({ createdAt: -1 });
+    // 1. Find orders where this vendor's ID exists in the vendorIds array
+    const orders = await Order.find({ vendorIds: vendorId })
+      .populate("userId", "name email") // Get customer details
+      .sort({ createdAt: -1 })
+      .lean(); // lean() makes the data a plain JS object so we can modify 'items'
 
-    console.log(`Vendor ID: ${vendorId} | Orders Found: ${orders.length}`);
+    // 2. Filter the items list for each order 
+    // This ensures Vendor A doesn't see Vendor B's products
+    const filteredOrders = orders.map(order => {
+      const myItems = order.items.filter(item => {
+        // Look into the nested medicineId object we found earlier
+        const itemVendorId = item.medicineId?.vendorId?.toString();
+        return itemVendorId === vendorId;
+      });
 
-    res.status(200).json(orders);
+      return {
+        ...order,
+        items: myItems,
+        // Optional: Recalculate total for JUST this vendor's items
+        vendorTotal: myItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+      };
+    });
+
+    res.status(200).json(filteredOrders);
   } catch (error) {
     console.error("Fetch Error:", error);
     res.status(500).json({ message: "Failed to fetch orders", error: error.message });
