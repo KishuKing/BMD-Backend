@@ -55,7 +55,7 @@ const getPrescriptions = async (req, res) => {
             patient: userId,
             prescriptionUrl: { $exists: true, $ne: null, $ne: "" }
         })
-        .populate('doctor', 'name specialization') // Optional: bring in doctor details
+        .populate('doctor', 'personalInfo.name specializations profileImage.url') // Updated to correctly target nested fields
         .sort({ createdAt: -1 });
 
         res.status(200).json({
