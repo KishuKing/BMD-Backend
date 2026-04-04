@@ -49,27 +49,23 @@ exports.getDoctorAppointments = async (req, res) => {
             return res.status(404).json({ success: false, message: "Doctor profile not found" });
         }
 
-        let statusFilter = [];
-if (type === 'upcoming') {
-    statusFilter = ['pending']; 
-} else if (type === 'ongoing') {
-    // 🔥 FIX: Move 'scheduled' here so they appear in the Ongoing tab
-    statusFilter = ['scheduled', 'ongoing']; 
-} else if (type === 'completed') {
-    statusFilter = ['completed', 'cancelled'];
-}
+        let query = { doctor: doctor._id };
+        if (type === 'upcoming') {
+            query.status = { $in: ['pending'] };
+        } else if (type === 'ongoing') {
+            query.status = { $in: ['scheduled', 'ongoing'] };
+        } else if (type === 'completed') {
+            query.status = { $in: ['completed', 'cancelled'] };
+        }
 
-        const appointments = await Appointment.find({
-            doctor: doctor._id,
-            status: { $in: statusFilter }
-        })
+        const appointments = await Appointment.find(query)
         .populate({
             path: 'patient',
             select: 'name email'
         })
         .sort({ date: 1, slot: 1 });
 
-        res.status(200).json({ success: true, count: appointments.length, data: appointments });
+        res.status(200).json({ success: true, count: appointments.length, fee: doctor.consultationFee, data: appointments });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
