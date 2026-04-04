@@ -87,7 +87,12 @@ exports.getDoctorById = async (req, res) => {
         return res.status(400).json({ message: "No Doctor ID provided" });
       }
   
-      const doctor = await Doctor.findById(id).populate('user', 'email');
+      let doctor = await Doctor.findById(id).populate('user', 'email');
+  
+      // If doctor is not found by Doctor _id, attempt to find by the associated User _id
+      if (!doctor) {
+        doctor = await Doctor.findOne({ user: id }).populate('user', 'email');
+      }
   
       if (!doctor) {
         console.log("Doctor not found in Database");
