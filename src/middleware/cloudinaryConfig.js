@@ -14,6 +14,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'BMD-healthify', 
     allowed_formats: ['jpg', 'png', 'jpeg', 'pdf'],
+    resource_type: 'auto',
   },
 });
 
