@@ -46,4 +46,29 @@ const uploadPrescription = async (req, res) => {
     }
 };
 
-module.exports = { uploadPrescription };
+const getPrescriptions = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Fetch all appointments for this user that have a valid prescriptionUrl
+        const prescriptions = await Appointment.find({
+            patient: userId,
+            prescriptionUrl: { $exists: true, $ne: null, $ne: "" }
+        })
+        .populate('doctor', 'name specialization') // Optional: bring in doctor details
+        .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            prescriptions: prescriptions
+        });
+    } catch (error) {
+        console.error("Fetch Prescriptions Error:", error);
+        res.status(500).json({ success: false, message: "Server error while fetching prescriptions", error: error.message });
+    }
+};
+
+module.exports = { 
+    uploadPrescription,
+    getPrescriptions
+};
