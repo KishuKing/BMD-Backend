@@ -105,7 +105,7 @@ app.use("/api/admin", adminRoute);
 app.use("/api/chatbot", chatbotRoute);
 app.use("/api/prescriptions", prescriptionRoute);
 
-// Server Listen
+// Server Listenn
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on 0.0.0.0:${PORT}`);
