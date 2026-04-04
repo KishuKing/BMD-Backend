@@ -22,11 +22,11 @@ const uploadPrescription = async (req, res) => {
         if (!appointment) {
             return res.status(404).json({ success: false, message: "Appointment not found." });
         }
-        
+
         // Ensure that the appointment belongs to the specified patient or doctor.
         // We rely on 'req.user' set by the `protect` middleware to ensure the caller is authenticated.
         if (patientId && appointment.patient.toString() !== patientId) {
-             return res.status(403).json({ success: false, message: "Appointment does not belong to the specified patient." });
+            return res.status(403).json({ success: false, message: "Appointment does not belong to the specified patient." });
         }
 
         // 4. Save URL to database
@@ -55,12 +55,25 @@ const getPrescriptions = async (req, res) => {
             patient: userId,
             prescriptionUrl: { $exists: true, $ne: null, $ne: "" }
         })
-        .populate('doctor', 'personalInfo.name specializations profileImage.url') // Updated to correctly target nested fields
-        .sort({ createdAt: -1 });
+            .populate('doctor', 'personalInfo.name specializations profileImage.url') // Correctly targeting nested fields
+            .sort({ createdAt: -1 });
+
+        // Map the result to flatten 'personalInfo.name' into 'name' for the frontend
+        const formattedPrescriptions = prescriptions.map(p => {
+            const appt = p.toObject();
+            if (appt.doctor) {
+                appt.doctor = {
+                    ...appt.doctor,
+                    name: appt.doctor.personalInfo?.name || "Dr. Unknown",
+                    specialization: appt.doctor.specializations?.[0] || ""
+                };
+            }
+            return appt;
+        });
 
         res.status(200).json({
             success: true,
-            prescriptions: prescriptions
+            prescriptions: formattedPrescriptions
         });
     } catch (error) {
         console.error("Fetch Prescriptions Error:", error);
@@ -68,7 +81,7 @@ const getPrescriptions = async (req, res) => {
     }
 };
 
-module.exports = { 
+module.exports = {
     uploadPrescription,
     getPrescriptions
 };
