@@ -91,6 +91,8 @@ exports.getRecentOrders = async (req, res) => {
     // 1. Find orders where this vendor's ID exists in the vendorIds array
     const orders = await Order.find({ vendorIds: vendorId })
       .populate("userId", "name email") // Get customer details
+      .populate({ path: "items.medicineId", model: "Product", select: "name price productImage vendorId" }) // populate medicineId if exists
+      .populate({ path: "items.productId", model: "Product", select: "name price productImage vendorId" }) // populate productId if exists
       .sort({ createdAt: -1 })
       .lean(); // lean() makes the data a plain JS object so we can modify 'items'
 
@@ -98,8 +100,14 @@ exports.getRecentOrders = async (req, res) => {
     // This ensures Vendor A doesn't see Vendor B's products
     const filteredOrders = orders.map(order => {
       const myItems = order.items.filter(item => {
-        // Look into the nested medicineId object we found earlier
-        const itemVendorId = item.medicineId?.vendorId?.toString();
+        // Look into the nested medicineId or productId object we found earlier
+        const vendorFromMedicine = item.medicineId?.vendorId?.toString();
+        const vendorFromProduct = item.productId?.vendorId?.toString();
+        
+        // Also check if item itself has vendorId directly
+        const vendorDirect = item.vendorId?.toString();
+
+        const itemVendorId = vendorFromMedicine || vendorFromProduct || vendorDirect;
         return itemVendorId === vendorId;
       });
 
@@ -107,7 +115,7 @@ exports.getRecentOrders = async (req, res) => {
         ...order,
         items: myItems,
         // Optional: Recalculate total for JUST this vendor's items
-        vendorTotal: myItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        vendorTotal: myItems.reduce((sum, item) => sum + ((item.price || item.medicineId?.price || item.productId?.price || 0) * (item.quantity || 1)), 0)
       };
     });
 
