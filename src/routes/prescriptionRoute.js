@@ -9,6 +9,6 @@ const { uploadPrescription, getPrescriptions } = require('../controllers/prescri
 // Uses 'upload.single('pdf')' to handle the file upload from the 'pdf' field
 router.post('/upload', protect, upload.single('pdf'), uploadPrescription);
 
-router.get('/', protect, getPrescriptions);
+router.get('/getPrescriptions', protect, getPrescriptions);
 
 module.exports = router;
