@@ -10,7 +10,8 @@ const appointmentSchema = new mongoose.Schema({
     type: String, 
     enum: ['pending', 'scheduled', 'ongoing', 'completed', 'cancelled'], 
     default: 'pending' 
-  }
+  },
+  prescriptionUrl: { type: String }
 }, { timestamps: true });
 
 // Prevent double booking: A doctor cannot have two appointments at the same time on the same day

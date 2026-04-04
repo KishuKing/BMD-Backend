@@ -12,10 +12,11 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'BMD-healthify', // The folder name in Cloudinary
-    allowed_formats: ['jpg', 'png', 'jpeg'],
+    folder: 'BMD-healthify', 
+    allowed_formats: ['jpg', 'png', 'jpeg', 'pdf'],
   },
 });
 
 const upload = multer({ storage: storage });
+
 module.exports = upload;
