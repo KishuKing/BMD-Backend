@@ -6,5 +6,6 @@ router.post('/orders', orderCtrl.createOrder);
 router.get('/orders/history/:userId', orderCtrl.getOrderHistory);
 router.get("/recent/:vendorId", orderCtrl.getRecentOrders);   
 router.get('/getAllOrders', orderCtrl.getAllOrders);
+router.put('/status/:id', orderCtrl.updateOrderStatus);
 
 module.exports = router;
