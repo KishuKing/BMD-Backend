@@ -9,6 +9,15 @@ exports.getProducts = async (req, res) => {
   }
 };
 
+exports.getProductsByVendor = async (req, res) => {
+  try {
+    const products = await Product.find({ vendorId: req.params.vendorId });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
